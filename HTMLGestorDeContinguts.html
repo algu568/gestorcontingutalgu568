@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>El primer documento HTML</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .noticia {
+            width: 30%;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .noticia h2 {
+            margin-top: 0;
+        }
+
+        .noticia img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            padding-top: 50px;
+        }
+        nav {
+            background-color: blue;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+    <h1>Exercisi gestor de continguts - Per Aleix Guzmán</h1>
+    <div class="search-results">
+        <input type="text" id="search-input" placeholder="Introdueix la paraula de cerca">
+        <button id="search-button">🔍</button>
+    </div>
+</nav>
+    <hr>
+    <br>
+    <div class="container" id="contingutRSS"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const rssUrl = 'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada';
+
+            fetch(rssUrl)
+                .then(response => response.text())
+                .then(str => new window.DOMParser().parseFromString(str, 'text/xml'))
+                .then(data => {
+                    const items = data.querySelectorAll('item');
+                    const container = document.getElementById('contingutRSS');
+
+                    items.forEach(item => {
+                        const title = item.querySelector('title').textContent;
+                        const link = item.querySelector('link').textContent;
+                        const description = item.querySelector('description').textContent;
+                        const imgMatch = description.match('enclosure');
+                        const imgSrc = imgMatch ? imgMatch[1] : '';
+
+                        const noticiaDiv = document.createElement('div');
+                        noticiaDiv.classList.add('noticia');
+
+                        const noticiaTitle = document.createElement('h2');
+                        noticiaTitle.textContent = title;
+
+                        const noticiaImg = document.createElement('img');
+                        noticiaImg.src = imgSrc;
+
+                        const noticiaSummary = document.createElement('p');
+                        noticiaSummary.textContent = description.replace(/<[^>]+>/g, '').substring(0, 100);
+
+                        const noticiaLink = document.createElement('a');
+                        noticiaLink.href = link;
+                        noticiaLink.textContent = 'Llegir més';
+
+                        noticiaDiv.appendChild(noticiaTitle);
+                        noticiaDiv.appendChild(noticiaImg);
+                        noticiaDiv.appendChild(noticiaSummary);
+                        noticiaDiv.appendChild(noticiaLink);
+
+                        container.appendChild(noticiaDiv);
+                    });
+                })
+                .catch(err => console.error('Error carregant les notícies:', err));
+        });
+    </script>
+
+</body>
+
+</html>
